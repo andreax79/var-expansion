@@ -25,7 +25,7 @@ describe('Variables substitution',function(){
     "use strict";
 
     var line0 = "la vispa ${name} altro testo $BOH noo$questoXX prova${A}aa";
-    var env =  { name: 'ciccio', questoXX: 'aahhh', BOH: 1, PWD: '/Users/andreax' }; 
+    var env =  { name: 'ciccio', questoXX: 'aahhh', BOH: 1, PWD: '/Users/andreax', '?': 0, f: function() { return 295; } }; 
 
     it('should accept empty environ',function(done) {
         substiteVariables(line0, {}, function(err, value) {
@@ -149,6 +149,13 @@ describe('Variables substitution',function(){
     it('should expand ${NEWVARx:?has not been set} 1 2 3',function(done) {
         substiteVariables('${NEWVARx:?has not been set} 1 2 3', { env: env }, function(err, value) {
             (err).should.be.equal('NEWVARx: has not been set');
+            done();
+        });
+    });
+
+    it('should execute functions',function(done) {
+        substiteVariables('${f}', { env: env }, function(err, value) {
+            value.should.be.equal('295');
             done();
         });
     });

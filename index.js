@@ -28,6 +28,9 @@
         var s = variable.split(':', 2);
         if (s.length == 2) {
             value = options.env[s[0]];
+            if (typeof value == 'function') {
+                value = value();
+            }
             if (s[1][0] == '+') { // Substitute replacement, but only if variable is defined and nonempty. Otherwise, substitute nothing
                 value = value ? s[1].substring(1) : '';
             } else if (s[1][0] == '-') { // Substitute the value of variable, but if that is empty or undefined, use default instead
@@ -50,6 +53,9 @@
             }
         } else {
             value = options.env[variable];
+            if (typeof value == 'function') {
+                value = value();
+            }
         }
         cb(err, value);
     }
