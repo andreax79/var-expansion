@@ -60,6 +60,14 @@
         cb(err, value);
     }
 
+    /**
+     * Substitute all the occurrences of environ variables in a text
+     *
+     * @param {String} text - Text with variables to be substituted
+     * @param {object} options.env - Environ variables
+     * @param {String|array} options.specialVars - List of special (single char) variables
+     * @param {function} cb - Callback function
+     */
     function substiteVariables(text, options, cb) {
         options = options || {};
         if (!options.env) {
@@ -103,22 +111,28 @@
                 } else { // $VAR
                     index++; // skip $
                     endIndex = -1;
-                    // search for var end
-                    for (var i = index, len = str.length; i < len; i++) {
-                        var code = str.charCodeAt(i);
-                        if (!(code > 47 && code < 58) &&  // numeric
-                            !(code > 64 && code < 91) &&  // upper alpha
-                            (code !== 95) &&              // underscore
-                            !(code > 96 && code < 123)) { // lower alpha
-                            endIndex = i;
-                            break;
+                    // special single char vars
+                    if (options.specialVars && options.specialVars.indexOf(str[index]) != -1) {
+                        variable = str[index];
+                        endIndex = index + 1;
+                    } else {
+                        // search for var end
+                        for (var i = index, len = str.length; i < len; i++) {
+                            var code = str.charCodeAt(i);
+                            if (!(code > 47 && code < 58) &&  // numeric
+                                !(code > 64 && code < 91) &&  // upper alpha
+                                (code !== 95) &&              // underscore
+                                !(code > 96 && code < 123)) { // lower alpha
+                                endIndex = i;
+                                break;
+                            }
                         }
-                    }
 
-                    if (endIndex == -1) { // delimeter not found
-                        variable = str.substring(index);
-                    } else { // delimeted found
-                        variable = str.substring(index, endIndex);
+                        if (endIndex == -1) { // delimeter not found
+                            variable = str.substring(index);
+                        } else { // delimeted found
+                            variable = str.substring(index, endIndex);
+                        }
                     }
                     if (!variable) {
                         result += '$';
