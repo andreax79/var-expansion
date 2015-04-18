@@ -1,6 +1,6 @@
 {
   "name": "var-expansion",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Shell Parameter Expansion for node.js and browser.",
   "main": "index.js",
   "scripts": {
