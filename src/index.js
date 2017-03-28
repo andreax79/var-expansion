@@ -13,17 +13,44 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
+ * @flow
  */
 
-/* jshint node: true, strict: true */
+export type Result = {
+  value: ?string,
+  error: ?{position?: number, message: string},
+};
 
-'use strict';
+export type Options = {
+  env?: {
+    [name: string]: string | number | Function,
+  },
+  specialVars?: string[],
+};
 
-module.exports.substituteVariables = substituteVariables;
+type StrictOptions = {
+  env: {
+    [name: string]: string | number | (() => string | number),
+  },
+  specialVars?: string[],
+};
 
-function substitueVariable(variable, options, cb) {
-  var value;
-  var err = null;
+/**
+ * Substitute all the occurrences of environ variables in a text
+ *
+ * @param {String} text - Text with variables to be substituted
+ * @param {object} options.env - Environ variables
+ * @param {String|array} options.specialVars - List of special (single char) variables
+ */
+export function substituteVariables(text: string, options: Options): Result {
+  const strictOptions = {env: {}, ...options};
+  const {value, error} = substituteVariablesInternal(text, 0, '', strictOptions);
+  return {value: String(value), error};
+}
+
+function substitueVariable(variable, options: StrictOptions) {
+  var value = null;
+  var error = null;
   var s = variable.split(':', 2);
   if (s.length == 2) {
     value = options.env[s[0]];
@@ -49,9 +76,9 @@ function substitueVariable(variable, options, cb) {
       // If variable is defined and not empty, substitute its value. Otherwise, print message as an error message.
       if (!value) {
         if (s[1].length > 1) {
-          return cb(s[0] + ': ' + s[1].substring(1));
+          return {error: {message: s[0] + ': ' + s[1].substring(1)}, value: null};
         } else {
-          return cb(s[0] + ': parameter null or not set');
+          return {error: {message: s[0] + ': parameter null or not set'}, value: null};
         }
       }
     }
@@ -61,28 +88,12 @@ function substitueVariable(variable, options, cb) {
       value = value();
     }
   }
-  cb(err, value);
+  return {error, value};
 }
 
-/**
-  * Substitute all the occurrences of environ variables in a text
-  *
-  * @param {String} text - Text with variables to be substituted
-  * @param {object} options.env - Environ variables
-  * @param {String|array} options.specialVars - List of special (single char) variables
-  * @param {function} cb - Callback function
-  */
-function substituteVariables(text, options, cb) {
-  options = options || {};
-  if (!options.env) {
-    options.env = {};
-  }
-  return substituteVariablesInternal(text, 0, '', options, cb);
-}
-
-function substituteVariablesInternal(str, position, result, options, cb) {
+function substituteVariablesInternal(str, position, result, options: StrictOptions) {
   if (position == -1 || !str) {
-    cb(null, result);
+    return {value: result, error: null};
   } else {
     var index = str.indexOf('$', position);
 
@@ -90,7 +101,7 @@ function substituteVariablesInternal(str, position, result, options, cb) {
       // no $
       result += str.substring(position);
       position = -1;
-      cb(null, result);
+      return {value: result, error: null};
     } else {
       // $ found
       var variable;
@@ -105,7 +116,10 @@ function substituteVariablesInternal(str, position, result, options, cb) {
           if (options.ignoreErrors) {
             variable = str.substring(index + 2);
           } else {
-            return cb('unexpected EOF while looking for matching }');
+            return {
+              value: result,
+              error: {position, message: 'unexpected EOF while looking for matching }'},
+            };
           }
         } else {
           // '}' found
@@ -153,17 +167,16 @@ function substituteVariablesInternal(str, position, result, options, cb) {
       }
       position = endIndex;
       if (!variable) {
-        substituteVariablesInternal(str, position, result, options, cb);
+        return substituteVariablesInternal(str, position, result, options);
       } else {
-        substitueVariable(variable, options, function callback(err, value) {
-          if (err && !options.ignoreErrors) {
-            return cb(err);
-          }
-          if (value !== null && value !== undefined) {
-            result += String(value);
-          }
-          substituteVariablesInternal(str, position, result, options, cb);
-        });
+        var {error, value} = substitueVariable(variable, options);
+        if (error && !options.ignoreErrors) {
+          return {error, value};
+        }
+        if (value != null) {
+          result += String(value);
+        }
+        return substituteVariablesInternal(str, position, result, options);
       }
     }
   }

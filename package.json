@@ -2,10 +2,12 @@
   "name": "var-expansion",
   "version": "0.0.2",
   "description": "Shell Parameter Expansion for node.js and browser.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "test": "mocha --reporter spec test"
+    "test": "make test",
+    "build": "make build"
   },
+  "files": ["lib/"],
   "repository": {
     "type": "git",
     "url": "https://github.com/andreax79/var-expansion"
@@ -18,10 +20,24 @@
   ],
   "author": "Andrea Bonomi <andrea.bonomi@gmail.com>",
   "license": "ISC",
+  "jest": {
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "<rootDir>/lib",
+      "<rootDir>/node_modules"
+    ]
+  },
   "devDependencies": {
-    "mocha": "~2.2.1",
-    "prettier": "^0.22.0",
-    "should": "~5.2.0"
+    "babel-cli": "^6.24.0",
+    "babel-jest": "^19.0.0",
+    "babel-preset-es2015": "^6.24.0",
+    "babel-preset-es2016": "^6.22.0",
+    "babel-preset-react": "^6.23.0",
+    "babel-preset-stage-3": "^6.22.0",
+    "flow-bin": "^0.42.0",
+    "flow-typed": "^2.0.0",
+    "jest": "^19.0.2",
+    "prettier": "^0.22.0"
   },
   "bugs": {
     "url": "https://github.com/andreax79/var-expansion/issues"
