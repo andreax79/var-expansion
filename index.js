@@ -17,7 +17,6 @@
 
 /* jshint node: true, strict: true */
 
-(function(exports){
     "use strict";
 
     module.exports.substiteVariables = substiteVariables;
@@ -155,5 +154,3 @@
             }
         }
     }
-
-})(typeof exports === 'undefined'? this['mymodule']={}: exports);
