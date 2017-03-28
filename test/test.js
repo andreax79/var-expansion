@@ -19,7 +19,7 @@
 
 var should = require('should');
 var varExpansion = require('../');
-var substiteVariables = varExpansion.substiteVariables;
+var substituteVariables = varExpansion.substituteVariables;
 
 describe('Variables substitution', function() {
   'use strict';
@@ -37,112 +37,112 @@ describe('Variables substitution', function() {
   };
 
   it('should accept empty environ', function(done) {
-    substiteVariables(line0, {}, function(err, value) {
+    substituteVariables(line0, {}, function(err, value) {
       value.should.be.equal('la vispa  altro testo  noo provaaa');
       done();
     });
   });
 
   it('should accept empty strings', function(done) {
-    substiteVariables('', {}, function(err, value) {
+    substituteVariables('', {}, function(err, value) {
       value.should.be.equal('');
       done();
     });
   });
 
   it('should substitute a var', function(done) {
-    substiteVariables(line0, {env: {BOH: 1}}, function(err, value) {
+    substituteVariables(line0, {env: {BOH: 1}}, function(err, value) {
       value.should.be.equal('la vispa  altro testo 1 noo provaaa');
       done();
     });
   });
 
   it('should substitute multiple vars', function(done) {
-    substiteVariables(line0, {env: env}, function(err, value) {
+    substituteVariables(line0, {env: env}, function(err, value) {
       value.should.be.equal('la vispa ciccio altro testo 1 nooaahhh provaaa');
       done();
     });
   });
 
   it('should substitute ${BOH}', function(done) {
-    substiteVariables('${BOH}', {env: env}, function(err, value) {
+    substituteVariables('${BOH}', {env: env}, function(err, value) {
       value.should.be.equal('1');
       done();
     });
   });
 
   it('should substitute $BOH', function(done) {
-    substiteVariables('$BOH', {env: env}, function(err, value) {
+    substituteVariables('$BOH', {env: env}, function(err, value) {
       value.should.be.equal('1');
       done();
     });
   });
 
   it('should raise error ${BOH', function(done) {
-    substiteVariables('${BOH', {env: env}, function(err, value) {
+    substituteVariables('${BOH', {env: env}, function(err, value) {
       err.should.be.not.null;
       done();
     });
   });
 
   it('should preserve spaces', function(done) {
-    substiteVariables(' $BOH ', {env: {BOH: 'abc'}}, function(err, value) {
+    substituteVariables(' $BOH ', {env: {BOH: 'abc'}}, function(err, value) {
       value.should.be.equal(' abc ');
       done();
     });
   });
 
   it('should preserve $', function(done) {
-    substiteVariables('$ ${} $', {}, function(err, value) {
+    substituteVariables('$ ${} $', {}, function(err, value) {
       value.should.be.equal('$ ${} $');
       done();
     });
   });
 
   it('should substite $PWD/test', function(done) {
-    substiteVariables('$PWD/test', {env: env}, function(err, value) {
+    substituteVariables('$PWD/test', {env: env}, function(err, value) {
       value.should.be.equal('/Users/andreax/test');
       done();
     });
   });
 
   it('should expand ${PWD:+ciccio}', function(done) {
-    substiteVariables('${PWD:+ciccio}', {env: env}, function(err, value) {
+    substituteVariables('${PWD:+ciccio}', {env: env}, function(err, value) {
       value.should.be.equal('ciccio');
       done();
     });
   });
 
   it('should expand ${AAA:+bla}', function(done) {
-    substiteVariables('${AAA:+bla}', {env: env}, function(err, value) {
+    substituteVariables('${AAA:+bla}', {env: env}, function(err, value) {
       value.should.be.equal('');
       done();
     });
   });
 
   it('should expand ${PWD:-ciccio}', function(done) {
-    substiteVariables('${PWD:-ciccio}', {env: env}, function(err, value) {
+    substituteVariables('${PWD:-ciccio}', {env: env}, function(err, value) {
       value.should.be.equal('/Users/andreax');
       done();
     });
   });
 
   it('should expand ${AAA:-bla}', function(done) {
-    substiteVariables('${AAA:-bla}', {env: env}, function(err, value) {
+    substituteVariables('${AAA:-bla}', {env: env}, function(err, value) {
       value.should.be.equal('bla');
       done();
     });
   });
 
   it('should expand ${PWD:#} ${BBB:#}', function(done) {
-    substiteVariables('${PWD:#} ${BBB:#}', {env: env}, function(err, value) {
+    substituteVariables('${PWD:#} ${BBB:#}', {env: env}, function(err, value) {
       value.should.be.equal('14 0');
       done();
     });
   });
 
   it('should expand ${NEWVAR} ${NEWVAR:=newval} ${NEWVAR} ${NEWVAR:=oldval}', function(done) {
-    substiteVariables(
+    substituteVariables(
       '${NEWVAR} ${NEWVAR:=newval} ${NEWVAR} ${NEWVAR:=oldval}',
       {env: env},
       function(err, value) {
@@ -153,14 +153,14 @@ describe('Variables substitution', function() {
   });
 
   it('should expand ${NEWVARx:?} 1 2 3', function(done) {
-    substiteVariables('${NEWVARx:?} 1 2 3', {env: env}, function(err, value) {
+    substituteVariables('${NEWVARx:?} 1 2 3', {env: env}, function(err, value) {
       err.should.be.equal('NEWVARx: parameter null or not set');
       done();
     });
   });
 
   it('should expand ${NEWVARx:?has not been set} 1 2 3', function(done) {
-    substiteVariables(
+    substituteVariables(
       '${NEWVARx:?has not been set} 1 2 3',
       {env: env},
       function(err, value) {
@@ -171,16 +171,20 @@ describe('Variables substitution', function() {
   });
 
   it('should execute functions', function(done) {
-    substiteVariables('${f}', {env: env}, function(err, value) {
+    substituteVariables('${f}', {env: env}, function(err, value) {
       value.should.be.equal('295');
       done();
     });
   });
 
   it('should expand $? $$', function(done) {
-    substiteVariables('$? $$', {env: env, specialVars: ['$', '?']}, function(err, value) {
-      value.should.be.equal('0 12345');
-      done();
-    });
+    substituteVariables(
+      '$? $$',
+      {env: env, specialVars: ['$', '?']},
+      function(err, value) {
+        value.should.be.equal('0 12345');
+        done();
+      }
+    );
   });
 });

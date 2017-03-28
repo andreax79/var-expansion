@@ -19,9 +19,9 @@
 
 'use strict';
 
-module.exports.substiteVariables = substiteVariables;
+module.exports.substituteVariables = substituteVariables;
 
-function substiteVariable(variable, options, cb) {
+function substitueVariable(variable, options, cb) {
   var value;
   var err = null;
   var s = variable.split(':', 2);
@@ -65,22 +65,22 @@ function substiteVariable(variable, options, cb) {
 }
 
 /**
-     * Substitute all the occurrences of environ variables in a text
-     *
-     * @param {String} text - Text with variables to be substituted
-     * @param {object} options.env - Environ variables
-     * @param {String|array} options.specialVars - List of special (single char) variables
-     * @param {function} cb - Callback function
-     */
-function substiteVariables(text, options, cb) {
+  * Substitute all the occurrences of environ variables in a text
+  *
+  * @param {String} text - Text with variables to be substituted
+  * @param {object} options.env - Environ variables
+  * @param {String|array} options.specialVars - List of special (single char) variables
+  * @param {function} cb - Callback function
+  */
+function substituteVariables(text, options, cb) {
   options = options || {};
   if (!options.env) {
     options.env = {};
   }
-  return substiteVariablesInternal(text, 0, '', options, cb);
+  return substituteVariablesInternal(text, 0, '', options, cb);
 }
 
-function substiteVariablesInternal(str, position, result, options, cb) {
+function substituteVariablesInternal(str, position, result, options, cb) {
   if (position == -1 || !str) {
     cb(null, result);
   } else {
@@ -153,16 +153,16 @@ function substiteVariablesInternal(str, position, result, options, cb) {
       }
       position = endIndex;
       if (!variable) {
-        substiteVariablesInternal(str, position, result, options, cb);
+        substituteVariablesInternal(str, position, result, options, cb);
       } else {
-        substiteVariable(variable, options, function callback(err, value) {
+        substitueVariable(variable, options, function callback(err, value) {
           if (err && !options.ignoreErrors) {
             return cb(err);
           }
           if (value !== null && value !== undefined) {
             result += String(value);
           }
-          substiteVariablesInternal(str, position, result, options, cb);
+          substituteVariablesInternal(str, position, result, options, cb);
         });
       }
     }
