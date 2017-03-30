@@ -13,6 +13,18 @@ check:
 
 build: $(LIB)
 
+version-major: check test build
+	@npm version major
+
+version-minor: check test build
+	@npm version minor
+
+version-patch: check test build
+	@npm version patch
+
+publish:
+	@npm publish
+
 lib/%.js: src/%.js
 	@mkdir -p $(@D)
 	@$(BIN)/babel -o $@ $<
