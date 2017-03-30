@@ -147,4 +147,15 @@ describe('Variables substitution', function() {
     });
     expect(value).toEqual('0 12345');
   });
+
+  it('should accept function as env', function() {
+    const env = {
+      A: 1,
+      B: 2,
+    };
+    const {value, error} = substituteVariables('$A + $B = 3', {
+      env: name => env[name],
+    });
+    expect(value).toEqual('1 + 2 = 3');
+  });
 });
